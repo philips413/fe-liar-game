@@ -13,9 +13,10 @@ function App() {
     }
 
     const connect = () => {
-        const socket = new WebSocket("ws//localhost:8080/ws");
+        const socket = new WebSocket("ws://localhost:8080/ws");
         stompClient.current = Stomp.over(socket);
         stompClient.current.connect({}, () => {
+            console.log("연결되었습니다. !! ")
             stompClient.current.subscribe(`/sub/chatroom/1`, (message) => {
                 const newMessage = JSON.parse(message.body);
                 setMessage((prevMessage) => [...prevMessage, newMessage]);
@@ -69,7 +70,7 @@ function App() {
                   type={"text"}
                   value={inputValue}
                   className={"input input-primary"}
-                  onClick={handleInputChange}
+                  onChange={handleInputChange}
               />
                {/*메세지 전송, 메세지 리스트에 추가*/}
               <button onClick={sendMessage}>입력</button>
