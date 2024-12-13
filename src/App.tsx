@@ -1,86 +1,41 @@
-import './main.css';
-import axios from "axios";
-import React, {useEffect, useRef, useState} from 'react';
-import {Stomp} from "@stomp/stompjs";
+import {Routes, Route, BrowserRouter, useLocation} from 'react-router-dom';
+import MainPage from "./pages/main/MainPage.tsx";
+import LobbyPage from "./pages/lobby/lobbyPage.tsx";
+import ChatRoom from "./pages/chatroom/ChatRoom.tsx";
+import React, {useEffect} from "react";
 
-function App() {
-
-    const stompClient = useRef<any>(null);
-    const [message, setMessage] = useState<any[]>([]);
-    const [inputValue, setInputValue] = useState<string>("");
-    const handleInputChange = (event) => {
-        setInputValue(event.target.value);
+import { IStaticMethods } from 'flyonui/flyonui';
+declare global {
+    interface Window {
+        HSStaticMethods: IStaticMethods;
     }
+}
 
-    const connect = () => {
-        const socket = new WebSocket("ws://localhost:8080/ws");
-        stompClient.current = Stomp.over(socket);
-        stompClient.current.connect({}, () => {
-            console.log("연결되었습니다. !! ")
-            stompClient.current.subscribe(`/sub/chatroom/1`, (message) => {
-                const newMessage = JSON.parse(message.body);
-                setMessage((prevMessage) => [...prevMessage, newMessage]);
-            });
-        });
-    };
+const App:React.FC = () => {
 
-    const disconnect = () => {
-        if(stompClient.current) {
-            stompClient.current.disconnect();
-        }
-    }
-
-    const fetchMessage = () => {
-        return axios.get("http://localhost:8080/chat/1")
-            .then(response => {
-                setMessage(response.data);
-            });
-    }
+    const {pathname} = useLocation();
 
     useEffect(() => {
-        connect();
-        fetchMessage();
-        return () => {
-            disconnect();
-        }
-    }, []);
+        const loadFlyonui = async () => {
+            await import('flyonui/flyonui');
 
+            window.HSStaticMethods.autoInit();
+        };
 
+        loadFlyonui();
+    }, [pathname]);
 
-    const sendMessage = () => {
-        if (stompClient.current && inputValue) {
-            const body = {
-                id: 1,
-                name: '테스트 1',
-                message: inputValue
-            }
-            stompClient.current.send("/pub/message", {}, JSON.stringify(body));
-            setInputValue("");
-        }
-    }
-
-
-
-  return (
-    <div className="App">
-      <ul>
-          <div>
-              {/*입력 필드*/}
-              <input
-                  type={"text"}
-                  value={inputValue}
-                  className={"input input-primary"}
-                  onChange={handleInputChange}
-              />
-               {/*메세지 전송, 메세지 리스트에 추가*/}
-              <button onClick={sendMessage}>입력</button>
-          </div>
-          {message.map((item, index) => (
-            <div key={index} className={"list-item"}>{item.message}</div>
-          ))}
-      </ul>
-    </div>
-  );
+    return (
+        <div className={"flex items-center justify-center h-screen bg-gray-100"}>
+            <div className={"w-full max-w-3xl mx-auto bg-white shadow-md p-4"}>
+                <Routes>
+                    <Route path="/" element={<MainPage/>}/>
+                    <Route path="/lobby" element={<LobbyPage/>}/>
+                    <Route path="/chat" element={<ChatRoom/>}/>
+                </Routes>
+            </div>
+        </div>
+    );
 }
 
 export default App;
