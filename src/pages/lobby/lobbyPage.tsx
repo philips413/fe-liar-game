@@ -1,20 +1,25 @@
-import React, { useState } from "react";
+import React, {useState} from "react";
 import axios from "axios";
-import Popup from "./popup.tsx";
 
 export default function LobbyPage() {
     const [chatRooms, setChatRooms] = useState<any[]>([]);
-    const [isPopupOpen, setIsPopupOpen] = useState(false);
-    const loadChatRooms = async () => {
-        const response = await axios.get("http://localhost:8080/chat/rooms");
-        setChatRooms(response.data);
-    };
+    const [chatRoomName, setChatRoomName] = useState<string>('');
+    const [chatLimit, setChatLimit] = useState<number>(10);
 
-    const togglePopup = () => {
-        setIsPopupOpen(!isPopupOpen);
-    };
+    const createChatRoom = () => {
+        const getUser: any = localStorage.getItem('user');
+        const user = JSON.parse(getUser);
+        const room = {
+            name: chatRoomName,
+            limit: chatLimit,
+            leader: user.partId
+        };
+        axios.post(`http://localhost:8080/chat/room`, room);
+    }
 
-    // loadChatRooms();
+    const changeRoomName = (e: any) => setChatRoomName(e.target.value);
+    const changeRoomLimit = (e: any) => setChatLimit(e.target.value);
+
     return (
         <>
             <div className="flex items-center justify-center min-h-screen text-center">
@@ -36,16 +41,15 @@ export default function LobbyPage() {
                     </div>
                 ))}
 
-                <div
-                    id="basic-modal"
+                <div id="basic-modal"
                     className="overlay modal overlay-open:opacity-100 hidden"
                     role="dialog"
                     tabIndex={-1}
                 >
-                    <div className="modal-dialog overlay-open:opacity-100">
+                    <div className="modal-dialog overlay-open:opacity-100" id={"basic-modal"}>
                         <div className="modal-content">
                             <div className="modal-header">
-                                <h3 className="modal-title">Dialog Title</h3>
+                                <h3 className="modal-title">방 만들기</h3>
                                 <button
                                     type="button"
                                     className="btn btn-text btn-circle btn-sm absolute end-3 top-3"
@@ -56,23 +60,44 @@ export default function LobbyPage() {
                                 </button>
                             </div>
                             <div className="modal-body">
-                                This is some placeholder content to show the scrolling behavior
-                                for modals. Instead of repeating the text in the modal, we use an
-                                inline style to set a minimum height, thereby extending the length
-                                of the overall modal and demonstrating the overflow scrolling.
-                                When content becomes longer than the height of the viewport,
-                                scrolling will move the modal as needed.
+                                <div className="w-96">
+                                    <label
+                                        className="label label-text"
+                                        htmlFor="defaultInput"
+                                    > 방이름 </label>
+                                    <input
+                                        type="text"
+                                        placeholder="라이어 게임 스타트!!"
+                                        className="input input-sm"
+                                        value={chatRoomName} onChange={changeRoomName}
+                                    />
+                                </div>
+                                <div className="w-96">
+                                    <label className="label label-text" htmlFor="defaultInput"> 참여인원 </label>
+                                    <input
+                                        type="number"
+                                        placeholder="John Doe"
+                                        className="input input-sm"
+                                        id="limit"
+                                        value={chatLimit}
+                                        onChange={changeRoomLimit}
+                                    />
+                                </div>
                             </div>
                             <div className="modal-footer">
+                                <button
+                                    type="button"
+                                    className="btn btn-primary"
+                                    onClick={createChatRoom}
+                                >
+                                    만들기
+                                </button>
                                 <button
                                     type="button"
                                     className="btn btn-soft btn-secondary"
                                     data-overlay="#basic-modal"
                                 >
-                                    Close
-                                </button>
-                                <button type="button" className="btn btn-primary">
-                                    Save changes
+                                    나가기
                                 </button>
                             </div>
                         </div>
