@@ -1,5 +1,13 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import axios from "axios";
+
+type ChatRoom = {
+    chatId: string;
+    title: string;
+    limit: number;
+    leader: string;
+    createdAt: string;
+}
 
 export default function LobbyPage() {
     const [chatRooms, setChatRooms] = useState<any[]>([]);
@@ -16,6 +24,22 @@ export default function LobbyPage() {
         };
         axios.post(`http://localhost:8080/chat/room`, room);
     }
+
+    const loadChatRooms = () => {
+        axios.get(`http://localhost:8080/chat/rooms`)
+            .then((response) => {
+                setChatRooms([...response.data]);
+            });
+    }
+
+    const enterChatRoom = (chatId: string) => {
+        console.log(chatId);
+        // axios.post(`http://localhost:8080/chat/room/${chatId}/enter`);
+    }
+
+    useEffect(() => {
+        loadChatRooms();
+    }, []);
 
     const changeRoomName = (e: any) => setChatRoomName(e.target.value);
     const changeRoomLimit = (e: any) => setChatLimit(e.target.value);
@@ -34,10 +58,10 @@ export default function LobbyPage() {
                 > 방 만들기</button>
 
                 {chatRooms.length === 0 && <h1>방이 없습니다.</h1>}
-                {chatRooms.map((room: any) => (
-                    <div key={room.id}>
-                        <h1>{room.name}</h1>
-                        <button>입장하기</button>
+                {chatRooms.map((room: ChatRoom) => (
+                    <div key={room.chatId}>
+                        <h1>{room.title}</h1>
+                        <button onClick={() => enterChatRoom(room.chatId)}>입장하기</button>
                     </div>
                 ))}
 
