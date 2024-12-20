@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import {useNavigate} from "react-router";
 
 type ChatRoom = {
     chatId: string;
@@ -14,6 +15,8 @@ export default function LobbyPage() {
     const [chatRoomName, setChatRoomName] = useState<string>('');
     const [chatLimit, setChatLimit] = useState<number>(10);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+    const navigate = useNavigate();
 
     const createChatRoom = async () => {
         const getUser: any = localStorage.getItem('user');
@@ -37,6 +40,7 @@ export default function LobbyPage() {
 
     const enterChatRoom = (chatId: string) => {
         console.log(chatId);
+        navigate(`/chat?chatId=${chatId}`);
         // axios.post(`http://localhost:8080/chat/room/${chatId}/enter`);
     }
 
