@@ -1,13 +1,13 @@
 import React, {useEffect, useRef, useState} from "react";
 import axios from "axios";
 import {Stomp} from "@stomp/stompjs";
-import {useParams} from "react-router-dom";
+import {useSearchParams} from "react-router-dom";
 
 export default function ChatRoom() {
 
-    const params = useParams();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const chatId = searchParams.get("chatId");
     const stompClient = useRef<any>(null);
-    const [chatId, setChatId] = useState<string>(params.chatId);
     const [message, setMessage] = useState<any[]>([]);
     const [inputValue, setInputValue] = useState<string>("");
     const handleInputChange = (event) => {
@@ -19,8 +19,9 @@ export default function ChatRoom() {
         stompClient.current = Stomp.over(socket);
         stompClient.current.connect({}, () => {
             console.log("연결되었습니다. !! ")
-            stompClient.current.subscribe(`/sub/chatroom/1`, (message) => {
+            stompClient.current.subscribe(`/sub/chatroom/${chatId}`, (message) => {
                 const newMessage = JSON.parse(message.body);
+                console.log(newMessage);
                 setMessage((prevMessage) => [...prevMessage, newMessage]);
             });
         });
@@ -33,13 +34,13 @@ export default function ChatRoom() {
     }
 
     const fetchMessage = () => {
-        console.log(chatId);
         let roomNumber = chatId;
         return axios.get(`http://localhost:8080/chat/${roomNumber}`)
             .then(response => {
                 setMessage(response.data);
             });
     }
+
     //
     useEffect(() => {
         connect();
@@ -54,7 +55,7 @@ export default function ChatRoom() {
     const sendMessage = () => {
         if (stompClient.current && inputValue) {
             const body = {
-                id: 1,
+                chatId: chatId,
                 name: '테스트 1',
                 message: inputValue
             }
