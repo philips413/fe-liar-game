@@ -15,17 +15,26 @@ export default function ChatRoom() {
     }
 
     const connect = () => {
+
         const socket = new WebSocket("ws://localhost:8080/ws");
         stompClient.current = Stomp.over(socket);
         stompClient.current.connect({}, () => {
             console.log("연결되었습니다. !! ")
             stompClient.current.subscribe(`/sub/chatroom/${chatId}`, (message) => {
                 const newMessage = JSON.parse(message.body);
-                console.log(newMessage);
                 setMessage((prevMessage) => [...prevMessage, newMessage]);
             });
         });
     };
+
+    const joinChatRoom = () => {
+        const getUser: any = localStorage.getItem('user');
+        const user = JSON.parse(getUser);
+        axios.post(`http://localhost:8080/chat/room/${chatId}/enter`, {
+            chatId: chatId,
+            partId: user.partId
+        })
+    }
 
     const disconnect = () => {
         if(stompClient.current) {
@@ -35,7 +44,9 @@ export default function ChatRoom() {
 
     const fetchMessage = () => {
         let roomNumber = chatId;
-        return axios.get(`http://localhost:8080/chat/${roomNumber}`)
+        const getUser: any = localStorage.getItem('user');
+        const user = JSON.parse(getUser);
+        return axios.get(`http://localhost:8080/chat/${roomNumber}?chatId=${roomNumber}&partId=${user.partId}`)
             .then(response => {
                 setMessage(response.data);
             });
@@ -43,6 +54,7 @@ export default function ChatRoom() {
 
     //
     useEffect(() => {
+        joinChatRoom();
         connect();
         fetchMessage();
         return () => {
@@ -64,9 +76,16 @@ export default function ChatRoom() {
         }
     }
 
+    const gameStart = () => {
+        axios.get(`http://localhost:8080/chat/gameStart/${chatId}`)
+    }
+
 
     return (
             <ul>
+                <div>
+                    <button className={"btn btn-primary"} onClick={gameStart}>게임 시작!</button>
+                </div>
                 <div>
                     {/*입력 필드*/}
                     <input
