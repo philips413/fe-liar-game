@@ -3,104 +3,120 @@ import axios from "axios";
 import {Stomp} from "@stomp/stompjs";
 import {useSearchParams} from "react-router-dom";
 
+type Chat = {
+    chatId: string;
+    leader: number;
+    participants: number;
+    status: any;
+    title: string;
+    createdAt: string;
+}
+
 export default function ChatRoom() {
 
     const [searchParams, setSearchParams] = useSearchParams();
     const chatId = searchParams.get("chatId");
     const stompClient = useRef<any>(null);
-    const [message, setMessage] = useState<any[]>([]);
-    const [inputValue, setInputValue] = useState<string>("");
-    const handleInputChange = (event) => {
-        setInputValue(event.target.value);
-    }
+    const [roomInfo, setRoomInfo] = useState<Chat>({
+        chatId: "",
+        createdAt: "",
+        leader: 0,
+        participants: 0,
+        status: undefined,
+        title: ""
+    });
+
+    const [users, setUsers] = useState<any[]>([]);
+    const getUser: any = localStorage.getItem('user');
+    const user = JSON.parse(getUser);
+
+    const [question, setQuestion] = useState<string>("");
 
     const connect = () => {
-
         const socket = new WebSocket("ws://localhost:8080/ws");
         stompClient.current = Stomp.over(socket);
         stompClient.current.connect({}, () => {
-            console.log("연결되었습니다. !! ")
             stompClient.current.subscribe(`/sub/chatroom/${chatId}`, (message) => {
-                const newMessage = JSON.parse(message.body);
-                setMessage((prevMessage) => [...prevMessage, newMessage]);
+                const response = JSON.parse(message.body);
+                setUsers(response.users)
             });
         });
     };
 
+    // 채팅방 정보 가져오기
+    const getChatRoomInfo = () => {
+        axios.get(`http://localhost:8080/chat/room/${chatId}`)
+            .then((response) => {
+                setRoomInfo(response.data);
+            })
+    }
+
+    // 채팅방 입장
     const joinChatRoom = () => {
-        const getUser: any = localStorage.getItem('user');
-        const user = JSON.parse(getUser);
         axios.post(`http://localhost:8080/chat/room/${chatId}/enter`, {
             chatId: chatId,
             partId: user.partId
         })
     }
 
+    // 채팅방에서 나가기
     const disconnect = () => {
         if(stompClient.current) {
+            axios.post(
+                `http://localhost:8080/chat/room/${chatId}/exit`, {
+                    chatId: chatId,
+                    partId: user.partId
+                })
             stompClient.current.disconnect();
         }
     }
 
-    const fetchMessage = () => {
-        let roomNumber = chatId;
-        const getUser: any = localStorage.getItem('user');
-        const user = JSON.parse(getUser);
-        return axios.get(`http://localhost:8080/chat/${roomNumber}?chatId=${roomNumber}&partId=${user.partId}`)
-            .then(response => {
-                setMessage(response.data);
-            });
-    }
-
-    //
     useEffect(() => {
         joinChatRoom();
-        connect();
-        fetchMessage();
+        getChatRoomInfo();
+        setTimeout(() => {
+            connect();
+        }, 1000);
         return () => {
             disconnect();
         }
     }, []);
 
-
-
-    const sendMessage = () => {
-        if (stompClient.current && inputValue) {
-            const body = {
-                chatId: chatId,
-                name: '테스트 1',
-                message: inputValue
-            }
-            stompClient.current.send("/pub/message", {}, JSON.stringify(body));
-            setInputValue("");
-        }
-    }
-
     const gameStart = () => {
-        axios.get(`http://localhost:8080/chat/gameStart/${chatId}`)
+        axios.get(
+            `http://localhost:8080/chat/gameStart/${chatId}`,
+            data => {
+                return '';
+            }
+        )
     }
 
 
     return (
-            <ul>
-                <div>
-                    <button className={"btn btn-primary"} onClick={gameStart}>게임 시작!</button>
-                </div>
-                <div>
-                    {/*입력 필드*/}
-                    <input
-                        type={"text"}
-                        value={inputValue}
-                        className={"input input-primary"}
-                        onChange={handleInputChange}
-                    />
-                    {/*메세지 전송, 메세지 리스트에 추가*/}
-                    <button onClick={sendMessage}>입력</button>
-                </div>
-                {message.map((item, index) => (
-                    <div key={index} className={"list-item"}>{item.message}</div>
-                ))}
+        <>
+            {
+                roomInfo.leader == user.partId ?
+                    <div className={"text-center mb-2"}>
+                        <button onClick={gameStart} className={"bg-blue-500 text-white p-2 rounded"}>게임 시작</button>
+                    </div>
+                    : null
+            }
+            {/** 참가자 명단  **/}
+            <div className={"bg-white shadow p-4 mb-2"}>
+                <p className={"text-xl"}>😊참가자 명단</p>
+                &emsp;
+                {users.map((item, index) => {
+                    return (
+                        <div key={index}>👤 {item.name}</div>
+                    )
+                })}
+            </div>
 
-            </ul>
+            {/** 제시어! **/}
+            <div className={"bg-white shadow p-4 mb-2 text-center"}>
+                <p className={"text-2xl mb-1"}>제시어</p>
+                <p className={"text-4xl"}>🎉 </p>
+            </div>
+        </>
     );
 }

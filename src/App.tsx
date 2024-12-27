@@ -27,7 +27,7 @@ const App:React.FC = () => {
 
     return (
         <div className={"flex items-center justify-center h-screen bg-gray-100"}>
-            <div className={"w-full max-w-3xl mx-auto bg-white shadow-md p-4"}>
+            <div className={"w-full max-w-3xl mx-autop-4"}>
                 <Routes>
                     <Route path="/" element={<MainPage/>}/>
                     <Route path="/lobby" element={<LobbyPage/>}/>
