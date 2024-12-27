@@ -30,15 +30,16 @@ export default function ChatRoom() {
     const getUser: any = localStorage.getItem('user');
     const user = JSON.parse(getUser);
 
-    const [question, setQuestion] = useState<string>("");
+    const [question, setQuestion] = useState<any[]>([]);
 
     const connect = () => {
         const socket = new WebSocket("ws://localhost:8080/ws");
         stompClient.current = Stomp.over(socket);
         stompClient.current.connect({}, () => {
-            stompClient.current.subscribe(`/sub/chatroom/${chatId}`, (message) => {
+            stompClient.current.subscribe(`/sub/chatroom/${chatId}`, (message:any) => {
                 const response = JSON.parse(message.body);
                 setUsers(response.users)
+                questViewer(response.question);
             });
         });
     };
@@ -71,25 +72,24 @@ export default function ChatRoom() {
         }
     }
 
+    const questViewer = list => {
+        list.forEach((item: any) => {
+            if(item.partId == user.partId) {
+                setQuestion(item.message)
+            }
+        })
+    }
+
     useEffect(() => {
         joinChatRoom();
         getChatRoomInfo();
-        setTimeout(() => {
-            connect();
-        }, 1000);
+        connect();
         return () => {
             disconnect();
         }
     }, []);
 
-    const gameStart = () => {
-        axios.get(
-            `http://localhost:8080/chat/gameStart/${chatId}`,
-            data => {
-                return '';
-            }
-        )
-    }
+    const gameStart = () => axios.get(`http://localhost:8080/chat/gameStart/${chatId}`)
 
 
     return (
@@ -115,7 +115,7 @@ export default function ChatRoom() {
             {/** 제시어! **/}
             <div className={"bg-white shadow p-4 mb-2 text-center"}>
                 <p className={"text-2xl mb-1"}>제시어</p>
-                <p className={"text-4xl"}>🎉 </p>
+                <p className={"text-4xl"}>🎉 {question}</p>
             </div>
         </>
     );
