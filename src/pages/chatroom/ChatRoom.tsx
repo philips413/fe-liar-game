@@ -36,6 +36,8 @@ export default function ChatRoom() {
         const socket = new WebSocket("ws://localhost:8080/ws");
         stompClient.current = Stomp.over(socket);
         stompClient.current.connect({}, () => {
+            joinChatRoom();
+            getChatRoomInfo();
             stompClient.current.subscribe(`/sub/chatroom/${chatId}`, (message:any) => {
                 const response = JSON.parse(message.body);
                 setUsers(response.users)
@@ -54,7 +56,7 @@ export default function ChatRoom() {
 
     // 채팅방 입장
     const joinChatRoom = () => {
-        axios.post(`http://localhost:8080/chat/room/${chatId}/enter`, {
+        axios.post(`http://localhost:8080/chat/room/enter`, {
             chatId: chatId,
             partId: user.partId
         })
@@ -64,7 +66,7 @@ export default function ChatRoom() {
     const disconnect = () => {
         if(stompClient.current) {
             axios.post(
-                `http://localhost:8080/chat/room/${chatId}/exit`, {
+                `http://localhost:8080/chat/room/exit`, {
                     chatId: chatId,
                     partId: user.partId
                 })
@@ -81,8 +83,6 @@ export default function ChatRoom() {
     }
 
     useEffect(() => {
-        joinChatRoom();
-        getChatRoomInfo();
         connect();
         return () => {
             disconnect();

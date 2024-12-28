@@ -13,7 +13,6 @@ export default function MainPage() {
     }
 
     const goLobby = async () => {
-        console.log(document.cookie)
         const result = await axios.post(`http://localhost:8080/part/create_user`, {
             name: name
         });
