@@ -96,13 +96,13 @@ export default function ChatRoom() {
         <>
             {
                 roomInfo.leader == user.partId ?
-                    <div className={"text-center mb-2"}>
+                    <div className={"text-center mb-2  font-sam3kr"}>
                         <button onClick={gameStart} className={"bg-blue-500 text-white p-2 rounded"}>게임 시작</button>
                     </div>
                     : null
             }
             {/** 참가자 명단  **/}
-            <div className={"bg-white shadow p-4 mb-2"}>
+            <div className={"bg-white shadow p-4 mb-2  font-sam3kr"}>
                 <p className={"text-xl"}>😊참가자 명단</p>
                 &emsp;
                 {users.map((item, index) => {
@@ -113,7 +113,7 @@ export default function ChatRoom() {
             </div>
 
             {/** 제시어! **/}
-            <div className={"bg-white shadow p-4 mb-2 text-center"}>
+            <div className={"bg-white shadow p-4 mb-2 text-center  font-sam3kr"}>
                 <p className={"text-2xl mb-1"}>제시어</p>
                 <p className={"text-4xl"}>🎉 {question}</p>
             </div>

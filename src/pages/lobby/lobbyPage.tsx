@@ -38,9 +38,7 @@ export default function LobbyPage() {
     }
 
     const enterChatRoom = (chatId: string) => {
-        console.log(chatId);
         navigate(`/chat?chatId=${chatId}`);
-        // axios.post(`http://localhost:8080/chat/room/${chatId}/enter`);
     }
 
     useEffect(() => {
@@ -52,22 +50,30 @@ export default function LobbyPage() {
 
     return (
         <>
-            <div className="flex items-center justify-center min-h-screen text-center">
+            <div className={"text-right font-sam3kr"}>
                 <button
                     type="button"
-                    className="btn btn-primary"
+                    className="btn btn-primary mb-2"
                     onClick={() => setIsModalOpen(true)}
                 >
                     방 만들기
                 </button>
-
+            </div>
+            <div className="flex items-center  font-sam3kr">
                 {chatRooms.length === 0 && <h1>방이 없습니다.</h1>}
                 {chatRooms.map((room: ChatRoom) => (
-                    <div key={room.chatId}>
-                        <h1>{room.title}</h1>
-                        <button onClick={() => enterChatRoom(room.chatId)}>입장하기</button>
+                    <div key={room.chatId} className="card sm:max-w-sm mx-2">
+                        <div className="card-body">
+                            <h5 className="card-title mb-0">{room.title}</h5>
+                            <p className="mb-4">현재 참석 인원 : <b>5명</b></p>
+                            <div className="card-actions">
+                                <a onClick={() => enterChatRoom(room.chatId)} href="#"
+                                   className="link link-primary no-underline">입장하기</a>
+                            </div>
+                        </div>
                     </div>
                 ))}
+            </div>
 
                 {isModalOpen && (
                     <div id="basic-modal" className="overlay modal overlay-open:opacity-100 open opened">
@@ -126,7 +132,6 @@ export default function LobbyPage() {
                         </div>
                     </div>
                 )}
-            </div>
-        </>
-    );
-}
+            </>
+            );
+            }
