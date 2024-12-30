@@ -26,12 +26,12 @@ export default function LobbyPage() {
             limit: chatLimit,
             leader: user.partId
         };
-        const result = await axios.post(`http://localhost:8080/chat/room`, room);
+        const result = await axios.post(`/chat/room`, room);
         navigate(`/chat?chatId=${result.data.chatId}`);
     }
 
     const loadChatRooms = async () => {
-        await axios.get(`http://localhost:8080/chat/rooms`)
+        await axios.get(`/chat/rooms`)
             .then((response) => {
                 setChatRooms([...response.data]);
             });

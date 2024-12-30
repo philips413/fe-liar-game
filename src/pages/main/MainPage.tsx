@@ -22,7 +22,7 @@ export default function MainPage() {
             alert('🚨참가명은 3자 이상이여야 합니다.');
             return;
         }
-        const result = await axios.post(`http://localhost:8080/part/create_user`, {
+        const result = await axios.post(`/part/create_user`, {
             name: name
         });
         localStorage.setItem('user', JSON.stringify(result.data));
