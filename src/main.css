@@ -12,3 +12,15 @@
 .font-sam3kr {
     font-family: 'Sam3KRFont';
 }
+
+@media (min-width: 768px) {
+    .content-container {
+        flex-direction: row;
+    }
+}
+
+@media (max-width: 767px) {
+    .content-container {
+        flex-direction: column;
+    }
+}

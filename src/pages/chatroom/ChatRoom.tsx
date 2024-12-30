@@ -46,7 +46,6 @@ export default function ChatRoom() {
         });
     };
 
-    // 채팅방 정보 가져오기
     const getChatRoomInfo = () => {
         axios.get(`http://localhost:8080/chat/room/${chatId}`)
             .then((response) => {
@@ -54,7 +53,6 @@ export default function ChatRoom() {
             })
     }
 
-    // 채팅방 입장
     const joinChatRoom = () => {
         axios.post(`http://localhost:8080/chat/room/enter`, {
             chatId: chatId,
@@ -62,7 +60,6 @@ export default function ChatRoom() {
         })
     }
 
-    // 채팅방에서 나가기
     const disconnect = () => {
         if(stompClient.current) {
             axios.post(
@@ -74,7 +71,7 @@ export default function ChatRoom() {
         }
     }
 
-    const questViewer = list => {
+    const questViewer = (list: any[]) => {
         list.forEach((item: any) => {
             if(item.partId == user.partId) {
                 setQuestion(item.message)
@@ -91,47 +88,40 @@ export default function ChatRoom() {
 
     const gameStart = () => axios.get(`http://localhost:8080/chat/gameStart/${chatId}`)
 
-
     return (
-        <div className={"flex flex-col items-center min-h-screen p-4 space-y-4"}>
-            <div className={"fixed top-0 left-0 w-full flex justify-between font-sam3kr bg-white shadow p-4"}>
-                <div>
-                    <button className={"btn"}>뒤로가기</button>
-                </div>
-                <div>
-                    <input type="text" placeholder="코드 입력" className="input w-[250px] font-sam3kr"/> &emsp;
+        <div className={"flex flex-col items-center h-dvh p-4 space-y-4"}>
+            <div className={"z-20 fixed top-0 left-0 w-full flex justify-between items-center font-sam3kr bg-white shadow p-4"}>
+                <button className={"btn"}>뒤로가기</button>
+                <div className={"flex items-center"}>
+                    <input type="text" placeholder="코드 입력" className="input w-[150px] font-sam3kr"/> &emsp;
                     <button className="btn-text btn-secondary font-sam3kr">링크복사</button>
                 </div>
             </div>
-            <div style={{marginTop: "70px"}}>
-                <div
-                    className={"card removing:translate-x-5 removing:opacity-0 w-dvw transition duration-300 ease-in-out h-[250px] overflow-auto"}
-                    id="card-dismiss"
-                >
+            <div style={{marginTop: "50px"}} className="content-container flex flex-col md:flex-row items-center justify-between mt-20 w-full">
+                <div className={"card min-h-[450px] w-full md:w-[350px] m-5"}>
                     <div className="card-body font-sam3kr">
                         <h5 className="card-title mb-2.5">😊참가자 명단</h5>
-                        {users.map((item, index) => {
-                            return (
-                                <p key={index} className="mb-4">👤 {item.name}</p>
-                        )
-                        })}
-                    </div>
-                    <div>
-                        {
-                            roomInfo.leader == user.partId ?
-                                <div className={"text-center mb-2  font-sam3kr"}>
-                                    <button onClick={gameStart} className={"bg-blue-500 text-white p-2 rounded"}>게임 시작
-                                    </button>
-                                </div>
-                                : null
-                        }
+                        <div className="participant-list overflow-auto max-h-[350px]">
+                            {users.map((item, index) => {
+                                return (
+                                    <p key={index} className="mb-4">👤 {item.name}</p>
+                                )
+                            })}
+                        </div>
+                        {roomInfo.leader == user.partId && (
+                            <div className={"text-center mt-2 mb-2 font-sam3kr"}>
+                                <button onClick={gameStart} className={"bg-blue-500 text-white p-2 rounded"}>게임 시작
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
-            </div>
-            {/** 제시어! **/}
-            <div className={"bg-white shadow p-4 mb-2 text-center  font-sam3kr"}>
-                <p className={"text-2xl mb-1"}>제시어</p>
-                <p className={"text-4xl"}>🎉 {question}</p>
+                <div className={"card min-h-[450px] w-full md:w-[350px] m-5"}>
+                    <div className="card-body font-sam3kr text-center">
+                        <h5 className="card-title">제시어</h5>
+                        <p className="text-4xl">🎉 {question}</p>
+                    </div>
+                </div>
             </div>
         </div>
     );
