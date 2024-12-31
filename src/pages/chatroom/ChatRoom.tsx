@@ -82,14 +82,6 @@ export default function ChatRoom() {
         }
     };
 
-    const copyUrl = async () => {
-        const clipboard = document.getElementById('clipboard-basic');
-        if (clipboard) {
-            const url = `${window.location.host}${clipboard.innerText}`;
-            await navigator.clipboard.writeText(url);
-        }
-    }
-
     useEffect(() => {
         connect();
         const _timer = setInterval(() => {
@@ -116,12 +108,8 @@ export default function ChatRoom() {
                 <h1 className={"text-md"}>{roomInfo.title}</h1>
                 <div className="rounded-box inline-flex items-center gap-1 p-1 shadow">
                     <code id="clipboard-basic" className="px-2 text-sm font-medium">
-                        /invite?{chatId}
+                        {window.location.origin}/invite?chatId={chatId}
                     </code>
-                    <button type="button" className="js-clipboard btn btn-square btn-text"
-                            aria-label="Copy text to clipboard" onClick={() => copyUrl()}>
-                        <span className="js-clipboard-default icon-[tabler--clipboard] size-5 transition"></span>
-                    </button>
                 </div>
             </div>
             <div style={{marginTop: "40px"}}

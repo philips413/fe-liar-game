@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import axios from "axios";
 import {useNavigate} from "react-router";
 
@@ -24,6 +24,13 @@ export default function LobbyPage() {
     const goChatRoom = () => {
         navigate(`/chat?chatId=${chatRooms}`);
     }
+
+    useEffect(() => {
+        const getUser: any = sessionStorage.getItem('user');
+        if (getUser == null) {
+            navigate('/');
+        }
+    }, []);
 
     return (
         <>
