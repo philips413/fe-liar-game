@@ -19,6 +19,10 @@ export default function InvitePage () {
         if (chatId == null) {
             navi('/');
         }
+
+        if (getUser != null && chatId != null) {
+            navi(`/chat?chatId=${chatId}`);
+        }
     }
 
     useEffect(() => {
