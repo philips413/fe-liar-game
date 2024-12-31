@@ -121,8 +121,12 @@ export default function ChatRoom() {
                     <div className="card-body">
                         <div className="participant-list overflow-auto max-h-[250px]">
                         {users.map((item, index) => {
+                                let isMe = false;
+                                if (item.partId == user.partId) {
+                                    isMe = true;
+                                }
                                 return (
-                                    <p key={index} className="mb-4">👤 {item.name}</p>
+                                    <p key={index} className={`mb-4 ${isMe ? 'text-blue-600' : null}`}>👤 {item.name}</p>
                                 )
                             })}
                         </div>
