@@ -6,8 +6,6 @@ import {useSearchParams} from "react-router-dom";
 type Chat = {
     chatId: string;
     leader: number;
-    participants: number;
-    status: any;
     title: string;
     createdAt: string;
 }
@@ -15,21 +13,19 @@ type Chat = {
 export default function ChatRoom() {
 
     const [searchParams, setSearchParams] = useSearchParams();
+    let [timer, setTimer] = useState<any>({});
     const chatId = searchParams.get("chatId");
     const stompClient = useRef<any>(null);
     const [roomInfo, setRoomInfo] = useState<Chat>({
         chatId: "",
         createdAt: "",
         leader: 0,
-        participants: 0,
-        status: undefined,
         title: ""
     });
 
     const [users, setUsers] = useState<any[]>([]);
     const getUser: any = localStorage.getItem('user');
     const user = JSON.parse(getUser);
-
     const [question, setQuestion] = useState<any[]>([]);
 
     const connect = () => {
@@ -78,10 +74,19 @@ export default function ChatRoom() {
             }
         })
     }
-
     useEffect(() => {
         connect();
+
+        const _timer = setInterval(() => {
+            stompClient.current.send(`/pub/status`, {}, JSON.stringify({
+                chatId: chatId,
+                partId: user.partId,
+                message: "alive!!"
+            }));
+        }, 5000);
+
         return () => {
+            clearInterval(_timer);
             disconnect();
         }
     }, []);

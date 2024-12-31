@@ -1,17 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, {useState} from "react";
 import axios from "axios";
 import {useNavigate} from "react-router";
 
-type ChatRoom = {
-    chatId: string;
-    title: string;
-    limit: number;
-    leader: string;
-    createdAt: string;
-}
 
 export default function LobbyPage() {
-    const [chatRooms, setChatRooms] = useState<any[]>([]);
     const [chatRoomName, setChatRoomName] = useState<string>('');
     const [chatLimit, setChatLimit] = useState<number>(10);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -29,21 +21,6 @@ export default function LobbyPage() {
         const result = await axios.post(`/chat/room`, room);
         navigate(`/chat?chatId=${result.data.chatId}`);
     }
-
-    const loadChatRooms = async () => {
-        await axios.get(`/chat/rooms`)
-            .then((response) => {
-                setChatRooms([...response.data]);
-            });
-    }
-
-    const enterChatRoom = (chatId: string) => {
-        navigate(`/chat?chatId=${chatId}`);
-    }
-
-    useEffect(() => {
-        loadChatRooms();
-    }, []);
 
     const changeRoomName = (e: any) => setChatRoomName(e.target.value);
     const changeRoomLimit = (e: any) => setChatLimit(e.target.value);
