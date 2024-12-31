@@ -2,6 +2,7 @@ import React, {useEffect, useRef, useState} from "react";
 import axios from "axios";
 import {Stomp} from "@stomp/stompjs";
 import {useSearchParams} from "react-router-dom";
+import {useNavigate} from "react-router";
 
 type Chat = {
     chatId: string;
@@ -10,9 +11,15 @@ type Chat = {
     createdAt: string;
 }
 
+type User = {
+    partId: any;
+    name: string;
+}
+
 export default function ChatRoom() {
 
     const [searchParams, setSearchParams] = useSearchParams();
+    const navigator = useNavigate();
     const chatId = searchParams.get("chatId");
     const stompClient = useRef<any>(null);
     const [roomInfo, setRoomInfo] = useState<Chat>({
@@ -24,7 +31,7 @@ export default function ChatRoom() {
 
     const [users, setUsers] = useState<any[]>([]);
     const getUser: any = sessionStorage.getItem('user');
-    const user = JSON.parse(getUser);
+    const user: User = JSON.parse(getUser) || {partId: -1, name: ""};
     const [question, setQuestion] = useState<any[]>([]);
 
     const connect = () => {
@@ -46,6 +53,9 @@ export default function ChatRoom() {
         axios.get(`/chat/room/${chatId}`)
             .then((response) => {
                 setRoomInfo(response.data);
+            })
+            .catch(() => {
+                navigator("/lobby");
             })
     }
 
@@ -83,6 +93,9 @@ export default function ChatRoom() {
     };
 
     useEffect(() => {
+        if(user.partId < 0) {
+            navigator("/?chatId=" + chatId);
+        }
         connect();
         const _timer = setInterval(() => {
             stompClient.current.send(`/pub/status`, {}, JSON.stringify({
@@ -96,7 +109,7 @@ export default function ChatRoom() {
             clearInterval(_timer);
             disconnect();
         }
-    }, [chatId]);
+    }, []);
 
     const gameStart = () => axios.get(`/chat/gameStart/${chatId}`)
 
@@ -124,7 +137,8 @@ export default function ChatRoom() {
                                 return (
                                     <p key={index} className={`mb-4 ${isMe ? 'text-blue-600' : null}`}>👤 {item.name}</p>
                                 )
-                            })}
+                            })
+                        }
                         </div>
                     </div>
                     <div className={"card-footer"}>
