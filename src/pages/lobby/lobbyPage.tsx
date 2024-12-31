@@ -5,8 +5,8 @@ import {useNavigate} from "react-router";
 
 export default function LobbyPage() {
     const [chatRoomName, setChatRoomName] = useState<string>('');
-    const [chatLimit, setChatLimit] = useState<number>(10);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const [chatRooms, setChatRooms] = useState<string>("");
 
     const navigate = useNavigate();
 
@@ -15,15 +15,15 @@ export default function LobbyPage() {
         const user = JSON.parse(getUser);
         const room = {
             name: chatRoomName,
-            limit: chatLimit,
             leader: user.partId
         };
         const result = await axios.post(`/chat/room`, room);
         navigate(`/chat?chatId=${result.data.chatId}`);
     }
 
-    const changeRoomName = (e: any) => setChatRoomName(e.target.value);
-    const changeRoomLimit = (e: any) => setChatLimit(e.target.value);
+    const goChatRoom = () => {
+        navigate(`/chat?chatId=${chatRooms}`);
+    }
 
     return (
         <>
@@ -37,8 +37,12 @@ export default function LobbyPage() {
             </div>
             <div className="divider">OR</div>
             <div className={"flex items-center justify-center font-sam3kr"}>
-                <input type="text" placeholder="코드 입력" className="input w-1/3 font-sam3kr"/> &emsp;
-                <button className="btn btn-warning font-sam3kr">😎입장하기</button>
+                <input
+                    type="text"
+                    placeholder="코드 입력"
+                    className="input w-1/3 font-sam3kr"
+                    onChange={(e) => setChatRooms(e.target.value)}/> &emsp;
+                <button className="btn btn-warning font-sam3kr" onClick={() => goChatRoom()}>😎입장하기</button>
             </div>
 
             {isModalOpen && (
@@ -63,18 +67,7 @@ export default function LobbyPage() {
                                         type="text"
                                         placeholder="라이어 게임 스타트!!"
                                         className="input input-sm"
-                                        value={chatRoomName} onChange={changeRoomName}
-                                    />
-                                </div>
-                                <div className="w-96">
-                                    <label className="label label-text" htmlFor="defaultInput"> 참여인원 </label>
-                                    <input
-                                        type="number"
-                                        placeholder="John Doe"
-                                        className="input input-sm"
-                                        id="limit"
-                                        value={chatLimit}
-                                        onChange={changeRoomLimit}
+                                        value={chatRoomName} onChange={e => setChatRoomName(e.target.value)}
                                     />
                                 </div>
                             </div>
