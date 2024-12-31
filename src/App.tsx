@@ -1,10 +1,12 @@
-import {Routes, Route, BrowserRouter, useLocation} from 'react-router-dom';
+import {Route, Routes, useLocation} from 'react-router-dom';
 import MainPage from "./pages/main/MainPage.tsx";
 import LobbyPage from "./pages/lobby/lobbyPage.tsx";
 import ChatRoom from "./pages/chatroom/ChatRoom.tsx";
 import React, {useEffect} from "react";
 
-import { IStaticMethods } from 'flyonui/flyonui';
+import {IStaticMethods} from 'flyonui/flyonui';
+import InvitePage from "./pages/invite/InvitePage.tsx";
+
 declare global {
     interface Window {
         HSStaticMethods: IStaticMethods;
@@ -32,6 +34,7 @@ const App:React.FC = () => {
                     <Route path="/" element={<MainPage/>}/>
                     <Route path="/lobby" element={<LobbyPage/>}/>
                     <Route path="/chat" element={<ChatRoom/>}/>
+                    <Route path="/invite" element={<InvitePage/>}/>
                 </Routes>
             </div>
         </div>

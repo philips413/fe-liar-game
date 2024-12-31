@@ -11,7 +11,7 @@ export default function LobbyPage() {
     const navigate = useNavigate();
 
     const createChatRoom = async () => {
-        const getUser: any = localStorage.getItem('user');
+        const getUser: any = sessionStorage.getItem('user');
         const user = JSON.parse(getUser);
         const room = {
             name: chatRoomName,

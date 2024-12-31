@@ -1,10 +1,13 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useNavigate} from "react-router";
 import axios from "axios";
+import {useSearchParams} from "react-router-dom";
 
 export default function MainPage() {
 
-    const [name, setName] = useState('');
+    const [name, setName] = useState<string>('');
+    const [searchParams, setSearchParams] = useSearchParams();
+
 
     const navigate = useNavigate();
 
@@ -25,11 +28,22 @@ export default function MainPage() {
         const result = await axios.post(`/part/create_user`, {
             name: name
         });
-        localStorage.setItem('user', JSON.stringify(result.data));
+        sessionStorage.setItem('user', JSON.stringify(result.data));
+        const chatId = searchParams.get("chatId");
+        if (chatId != null) {
+            navigate(`/chat?chatId=${chatId}`);
+            return;
+        }
         navigate('/lobby');
 
     }
 
+    useEffect(() => {
+        const getUser: any = sessionStorage.getItem('user');
+        if (getUser != null) {
+            navigate('/lobby');
+        }
+    }, []);
 
 
     return (

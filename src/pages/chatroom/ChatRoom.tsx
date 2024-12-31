@@ -13,7 +13,6 @@ type Chat = {
 export default function ChatRoom() {
 
     const [searchParams, setSearchParams] = useSearchParams();
-    let [timer, setTimer] = useState<any>({});
     const chatId = searchParams.get("chatId");
     const stompClient = useRef<any>(null);
     const [roomInfo, setRoomInfo] = useState<Chat>({
@@ -24,7 +23,7 @@ export default function ChatRoom() {
     });
 
     const [users, setUsers] = useState<any[]>([]);
-    const getUser: any = localStorage.getItem('user');
+    const getUser: any = sessionStorage.getItem('user');
     const user = JSON.parse(getUser);
     const [question, setQuestion] = useState<any[]>([]);
 
@@ -34,6 +33,7 @@ export default function ChatRoom() {
         stompClient.current.connect({}, () => {
             joinChatRoom();
             getChatRoomInfo();
+
             stompClient.current.subscribe(`/sub/chatroom/${chatId}`, (message:any) => {
                 const response = JSON.parse(message.body);
                 setUsers(response.users)
@@ -74,9 +74,24 @@ export default function ChatRoom() {
             }
         })
     }
+
+    const goBack = () => {
+        return () => {
+            disconnect();
+            window.history.back();
+        }
+    };
+
+    const copyUrl = async () => {
+        const clipboard = document.getElementById('clipboard-basic');
+        if (clipboard) {
+            const url = `${window.location.host}${clipboard.innerText}`;
+            await navigator.clipboard.writeText(url);
+        }
+    }
+
     useEffect(() => {
         connect();
-
         const _timer = setInterval(() => {
             stompClient.current.send(`/pub/status`, {}, JSON.stringify({
                 chatId: chatId,
@@ -95,19 +110,29 @@ export default function ChatRoom() {
 
     return (
         <div className={"flex flex-col items-center h-dvh p-4 space-y-4"}>
-            <div className={"z-20 fixed top-0 left-0 w-full flex justify-between items-center font-sam3kr bg-white shadow p-4"}>
-                <button className={"btn btn-sm"}>뒤로가기</button>
+            <div
+                className={"z-20 fixed top-0 left-0 w-full flex justify-between items-center font-sam3kr bg-white shadow p-4"}>
+                <button className={"btn btn-sm"} onClick={goBack()}>뒤로가기</button>
                 <h1 className={"text-md"}>{roomInfo.title}</h1>
-                <button className="btn btn-sm btn-text btn-secondary">링크복사</button>
+                <div className="rounded-box inline-flex items-center gap-1 p-1 shadow">
+                    <code id="clipboard-basic" className="px-2 text-sm font-medium">
+                        /invite?{chatId}
+                    </code>
+                    <button type="button" className="js-clipboard btn btn-square btn-text"
+                            aria-label="Copy text to clipboard" onClick={() => copyUrl()}>
+                        <span className="js-clipboard-default icon-[tabler--clipboard] size-5 transition"></span>
+                    </button>
+                </div>
             </div>
-            <div style={{marginTop: "40px"}} className="content-container flex flex-col md:flex-row items-center justify-between mt-20 w-full">
+            <div style={{marginTop: "40px"}}
+                 className="content-container flex flex-col md:flex-row items-center justify-between mt-20 w-full">
                 <div className={"card min-h-[450px] w-full md:w-[350px] m-5 text-center font-sam3kr"}>
                     <div className={"card-header"}>
                         <h5 className="card-title mb-2.5">😊참가자 명단</h5>
                     </div>
                     <div className="card-body">
                         <div className="participant-list overflow-auto max-h-[250px]">
-                            {users.map((item, index) => {
+                        {users.map((item, index) => {
                                 return (
                                     <p key={index} className="mb-4">👤 {item.name}</p>
                                 )
