@@ -88,7 +88,7 @@ export default function ChatRoom() {
     const goBack = () => {
         return () => {
             disconnect();
-            window.history.back();
+            navigator("/lobby");
         }
     };
 
