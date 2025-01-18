@@ -119,7 +119,7 @@ export default function ChatRoom() {
                 className={"z-20 fixed top-0 left-0 w-full flex justify-between items-center font-sam3kr bg-white shadow p-4"}>
                 <button className={"btn btn-sm"} onClick={goBack()}>뒤로가기</button>
                 <h1 className={"text-md"}>{roomInfo.title}</h1>
-                <button onClick={() => prompt("주소를 복사해주세요", `http://${window.location.hostname}:3000/invite?chatId=${chatId}`)}>초대하기</button>
+                <button onClick={() => prompt("주소를 복사해주세요", `http://${window.location.hostname}/invite?chatId=${chatId}`)}>초대하기</button>
             </div>
             <div style={{marginTop: "40px"}}
                  className="content-container flex flex-col md:flex-row items-center justify-between mt-20 w-full">
