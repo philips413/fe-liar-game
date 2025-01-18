@@ -19,6 +19,7 @@ type User = {
 export default function ChatRoom() {
 
     const [searchParams, setSearchParams] = useSearchParams();
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const navigator = useNavigate();
     const chatId = searchParams.get("chatId");
     const stompClient = useRef<any>(null);
@@ -87,9 +88,14 @@ export default function ChatRoom() {
 
     const goBack = () => {
         return () => {
-            disconnect();
-            navigator("/lobby");
+            setIsModalOpen(true);
         }
+    };
+
+    const doExit = () => {
+        setIsModalOpen(false);
+        disconnect();
+        navigator("/lobby");
     };
 
     useEffect(() => {
@@ -114,51 +120,91 @@ export default function ChatRoom() {
     const gameStart = () => axios.get(`/chat/gameStart/${chatId}`)
 
     return (
-        <div className={"flex flex-col items-center h-dvh p-4 space-y-4"}>
-            <div
-                className={"z-20 fixed top-0 left-0 w-full flex justify-between items-center font-sam3kr bg-white shadow p-4"}>
-                <button className={"btn btn-sm"} onClick={goBack()}>뒤로가기</button>
-                <h1 className={"text-md"}>{roomInfo.title}</h1>
-                <button onClick={() => prompt("주소를 복사해주세요", `http://${window.location.hostname}/invite?chatId=${chatId}`)}>초대하기</button>
-            </div>
-            <div style={{marginTop: "40px"}}
-                 className="content-container flex flex-col md:flex-row items-center justify-between mt-20 w-full">
-                <div className={"card min-h-[450px] w-full md:w-[350px] m-5 text-center font-sam3kr"}>
-                    <div className={"card-header"}>
-                        <h5 className="card-title mb-2.5">😊참가자 명단</h5>
-                    </div>
-                    <div className="card-body">
-                        <div className="participant-list overflow-auto max-h-[250px]">
-                        {users.map((item, index) => {
-                                let isMe = false;
-                                if (item.partId == user.partId) {
-                                    isMe = true;
-                                }
-                                return (
-                                    <p key={index} className={`mb-4 ${isMe ? 'text-blue-600' : null}`}>👤 {item.name}</p>
-                                )
-                            })
-                        }
+        <>
+            <div className={"flex flex-col items-center h-dvh p-4 space-y-4"}>
+                <div
+                    className={"z-20 fixed top-0 left-0 w-full flex justify-between items-center font-sam3kr bg-white shadow p-4"}>
+                    <button className={"btn btn-sm"} onClick={goBack()}>뒤로가기</button>
+                    <h1 className={"text-md"}>{roomInfo.title}</h1>
+                    <button onClick={() => prompt("주소를 복사해주세요", `http://${window.location.hostname}/invite?chatId=${chatId}`)}>초대하기</button>
+                </div>
+                <div style={{marginTop: "40px"}}
+                     className="content-container flex flex-col md:flex-row items-center justify-between mt-20 w-full">
+                    <div className={"card min-h-[450px] w-full md:w-[350px] m-5 text-center font-sam3kr"}>
+                        <div className={"card-header"}>
+                            <h5 className="card-title mb-2.5">😊참가자 명단</h5>
+                        </div>
+                        <div className="card-body">
+                            <div className="participant-list overflow-auto max-h-[250px]">
+                            {users.map((item, index) => {
+                                    let isMe = false;
+                                    if (item.partId == user.partId) {
+                                        isMe = true;
+                                    }
+                                    return (
+                                        <p key={index} className={`mb-4 ${isMe ? 'text-blue-600' : null}`}>👤 {item.name}</p>
+                                    )
+                                })
+                            }
+                            </div>
+                        </div>
+                        <div className={"card-footer"}>
+                            {roomInfo.leader == user.partId && (
+                                <div className={"text-center mt-2 mb-2 font-sam3kr"}>
+                                    <button onClick={gameStart} className={"bg-blue-500 text-white p-2 rounded"}>게임 시작
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
-                    <div className={"card-footer"}>
-                        {roomInfo.leader == user.partId && (
-                            <div className={"text-center mt-2 mb-2 font-sam3kr"}>
-                                <button onClick={gameStart} className={"bg-blue-500 text-white p-2 rounded"}>게임 시작
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                </div>
-                <div className={"card min-h-[450px] w-full md:w-[350px] m-5 text-center font-sam3kr "}>
-                    <div className={"card-header"}>
-                        <h5 className="card-title">제시어</h5>
-                    </div>
-                    <div className="card-body text-center flex justify-center">
-                        <p className="text-4xl">{question}</p>
+                    <div className={"card min-h-[450px] w-full md:w-[350px] m-5 text-center font-sam3kr "}>
+                        <div className={"card-header"}>
+                            <h5 className="card-title">제시어</h5>
+                        </div>
+                        <div className="card-body text-center flex justify-center">
+                            <p className="text-4xl">{question}</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+            {isModalOpen && (
+                <div id="basic-modal" className="overlay modal overlay-open:opacity-100 open opened">
+                    <div className="modal-dialog overlay-open:opacity-100">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h3 className="modal-title">나가기</h3>
+                                <button
+                                    type="button"
+                                    className="btn btn-text btn-circle btn-sm absolute end-3 top-3"
+                                    aria-label="Close"
+                                    onClick={() => setIsModalOpen(false)}
+                                >
+                                    <span className="icon-[tabler--x] size-4"></span>
+                                </button>
+                            </div>
+                            <div className="modal-body">
+                                게임에서 나가시겠습니까?
+                            </div>
+                            <div className="modal-footer">
+                                <button
+                                    type="button"
+                                    className="btn btn-primary"
+                                    onClick={() => setIsModalOpen(false)}
+                                >
+                                    머물기
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn btn-soft btn-secondary"
+                                    onClick={() => doExit()}
+                                >
+                                    나가기
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
     );
 }
